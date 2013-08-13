@@ -28,6 +28,6 @@ The user should return to his or her WordPress profile screen and disable Authy 
 
 Yes, as an admin you can go to settings page of plugin, select the user roles in the list and click Save Changes to save configuration.
 
-### How can the admin an admin force Authy Two Factor Authentication on a specific user?
+### How can an admin force Authy Two Factor Authentication on a specific user?
 
 As an admin you can go to users page. Then select the user in the list and click edit. Go to the bottom an enter the user mobile number and contry code and click update user.
