@@ -3,7 +3,7 @@ Contributors: authy, ethitter
 Tags: authentication, authy, two factor, security, login, authenticate
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 2.3
+Stable tag: 2.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ As an admin, you can go to the users page. Then, select the user in the list, an
 1. Authy Two-Factor Authentication page.
 
 == Changelog ==
+
+= 2.4 =
+* Use the remember me option when authenticate the user
 
 = 2.3 =
 * Hide the authy settings page for other users except for super admin (multisite)
