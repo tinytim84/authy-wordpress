@@ -7,7 +7,7 @@ Stable tag: 2.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin adds Authy two-factor uthentication to WordPress.
+This plugin adds Authy two-factor authentication to WordPress.
 
 == Description ==
 Authy helps you proctect your WordPress site from hackers using simple two-factor authentication.
@@ -25,7 +25,7 @@ Plugin development is found at https://github.com/authy/authy-wordpress.
 
 == Frequently Asked Questions ==
 
-= How can a user enable two-factor authentication? =
+= How can an user enable two-factor authentication? =
 The user should go to his or her WordPress profile page and add his or her mobile number and country code.
 
 = How can a user disable Authy after enabling it? =
