@@ -1241,9 +1241,9 @@ class Authy {
             return $user;
         }
 
-        $step = $_POST['step'];
-        $signature = $_POST['authy_signature'];
-        $authy_user_info = $_POST['authy_user'];
+        $step = isset( $_POST['step'] ) ? $_POST['step'] : null;
+        $signature = isset( $_POST['authy_signature'] ) ? $_POST['authy_signature'] : null;
+        $authy_user_info = isset( $_POST['authy_user'] ) ? $_POST['authy_user'] : null;
 
         if ( !empty( $username ) ) {
             return $this->verify_password_and_redirect( $user, $username, $password, $_POST['redirect_to'] );
@@ -1253,15 +1253,20 @@ class Authy {
             return new WP_Error( 'authentication_failed', __( '<strong>ERROR: missing credentials</strong>' ) );
         }
 
-        if ( empty( $step ) && isset( $_POST['authy_token'] ) )
+        $authy_token = isset( $_POST['authy_token'] ) ? $_POST['authy_token'] : null;
+
+        if ( empty( $step ) && $authy_token )
         {
             $user = get_user_by( 'login', $_POST['username'] );
             // This line prevents WordPress from setting the authentication cookie and display errors.
             remove_action( 'authenticate', 'wp_authenticate_username_password', 20 );
 
-            return $this->login_with_2FA( $user, $signature, $_POST['authy_token'], $_POST['redirect_to'], $_POST['rememberme'] );
+            $redirect_to = isset( $_POST['redirect_to'] ) ? $_POST['redirect_to'] : null;
+            $rememberme = isset( $_POST['rememberme'] ) ? $_POST['rememberme'] : null;
+            
+            return $this->login_with_2FA( $user, $signature, $authy_token, $redirect_to, $rememberme );
         }
-        elseif ( $step == 'enable_authy' && isset($authy_user_info) && isset( $authy_user_info['country_code'] ) && isset( $authy_user_info['cellphone'] ) )
+        elseif ( $step == 'enable_authy' && $authy_user_info && isset( $authy_user_info['country_code'] ) && isset( $authy_user_info['cellphone'] ) )
         {
             // if step is enable_authy and have country_code and phone show the enable authy page
             $params = array(
@@ -1273,12 +1278,12 @@ class Authy {
 
             return $this->check_user_fields_and_redirect_to_verify_token( $params );
         }
-        elseif ( $step == 'verify_installation' && isset( $_POST['authy_token'] ) )
+        elseif ( $step == 'verify_installation' && $authy_token )
         {
             // If step is verify_installation and have authy_token show the verify authy installation page.
             $params = array(
                 'username' => $_POST['username'],
-                'authy_token' => $_POST['authy_token'],
+                'authy_token' => $authy_token,
                 'signature' => $signature,
             );
 
