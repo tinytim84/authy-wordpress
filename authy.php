@@ -1037,7 +1037,7 @@ class Authy {
         $username = $user->user_login;
         $user_data = $this->get_authy_data( $user->ID );
         $user_signature = get_user_meta( $user->ID, $this->signature_key, true );
-        authy_token_form( $username, $user_data, $user_signature, $redirect, $errors );
+        authy_token_form( $username, $user_data, $user_signature, $redirect );
     }
 
     /**
@@ -1263,7 +1263,7 @@ class Authy {
 
             $redirect_to = isset( $_POST['redirect_to'] ) ? $_POST['redirect_to'] : null;
             $rememberme = isset( $_POST['rememberme'] ) ? $_POST['rememberme'] : null;
-            
+
             return $this->login_with_2FA( $user, $signature, $authy_token, $redirect_to, $rememberme );
         }
         elseif ( $step == 'enable_authy' && $authy_user_info && isset( $authy_user_info['country_code'] ) && isset( $authy_user_info['cellphone'] ) )
