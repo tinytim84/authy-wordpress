@@ -1033,11 +1033,11 @@ class Authy {
      * @uses _e
      * @return string
      */
-    public function render_authy_token_page( $user, $redirect ) {
+    public function render_authy_token_page( $user, $redirect, $remember_me ) {
         $username = $user->user_login;
         $user_data = $this->get_authy_data( $user->ID );
         $user_signature = get_user_meta( $user->ID, $this->signature_key, true );
-        authy_token_form( $username, $user_data, $user_signature, $redirect );
+        authy_token_form( $username, $user_data, $user_signature, $redirect, $remember_me );
     }
 
     /**
@@ -1065,7 +1065,7 @@ class Authy {
      * @param string $redirect_to
      * @return mixed
      */
-    public function verify_password_and_redirect( $user, $username, $password, $redirect_to ) {
+    public function verify_password_and_redirect( $user, $username, $password, $redirect_to, $remember_me ) {
         $userWP = get_user_by( 'login', $username );
         // Don't bother if WP can't provide a user object.
         if ( ! is_object( $userWP ) || ! property_exists( $userWP, 'ID' ) ) {
@@ -1092,7 +1092,7 @@ class Authy {
             render_enable_authy_page( $userWP, $signature ); // Show the enable authy page
         } else {
             $this->action_request_sms( $username ); // Send sms
-            $this->render_authy_token_page( $user, $redirect_to ); // Show the authy token page
+            $this->render_authy_token_page( $user, $redirect_to, $remember_me ); // Show the authy token page
         }
         exit();
     }
@@ -1119,7 +1119,6 @@ class Authy {
             if ( $api_response === true ) {
                 // If remember me is set the cookies will be kept for 14 days.
                 $remember_me = ($remember_me == 'forever') ? true : false;
-
                 wp_set_auth_cookie( $user->ID, $remember_me ); // token was checked so go ahead.
                 wp_safe_redirect( $redirect_to );
                 exit(); // redirect without returning anything.
@@ -1244,9 +1243,10 @@ class Authy {
         $step = isset( $_POST['step'] ) ? $_POST['step'] : null;
         $signature = isset( $_POST['authy_signature'] ) ? $_POST['authy_signature'] : null;
         $authy_user_info = isset( $_POST['authy_user'] ) ? $_POST['authy_user'] : null;
+        $remember_me = isset( $_POST['rememberme'] ) ? $_POST['rememberme'] : null;
 
         if ( !empty( $username ) ) {
-            return $this->verify_password_and_redirect( $user, $username, $password, $_POST['redirect_to'] );
+            return $this->verify_password_and_redirect( $user, $username, $password, $_POST['redirect_to'], $remember_me );
         }
 
         if( !isset( $signature ) ) {
@@ -1262,9 +1262,7 @@ class Authy {
             remove_action( 'authenticate', 'wp_authenticate_username_password', 20 );
 
             $redirect_to = isset( $_POST['redirect_to'] ) ? $_POST['redirect_to'] : null;
-            $rememberme = isset( $_POST['rememberme'] ) ? $_POST['rememberme'] : null;
-
-            return $this->login_with_2FA( $user, $signature, $authy_token, $redirect_to, $rememberme );
+            return $this->login_with_2FA( $user, $signature, $authy_token, $redirect_to, $remember_me );
         }
         elseif ( $step == 'enable_authy' && $authy_user_info && isset( $authy_user_info['country_code'] ) && isset( $authy_user_info['cellphone'] ) )
         {
