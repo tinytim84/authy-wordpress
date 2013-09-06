@@ -219,7 +219,7 @@ class Authy {
         $show_settings = false;
         $can_admin_network = is_plugin_active_for_network( 'authy-two-factor-authentication/authy.php' ) && current_user_can( 'network_admin' );
 
-        if ( $can_admin_network || current_user_can( 'edit_plugins' ) ) {
+        if ( $can_admin_network || current_user_can( 'manage_options' ) ) {
             $show_settings = true;
         }
 
