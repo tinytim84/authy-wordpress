@@ -1249,7 +1249,7 @@ class Authy {
             return $this->verify_password_and_redirect( $user, $username, $password, $_POST['redirect_to'], $remember_me );
         }
 
-        if( !isset( $signature ) ) {
+        if( !empty($_POST) && !isset( $signature ) ) {
             return new WP_Error( 'authentication_failed', __( '<strong>ERROR: missing credentials</strong>' ) );
         }
 
@@ -1287,8 +1287,6 @@ class Authy {
 
             return $this->verify_authy_installation( $params );
         }
-
-        return new WP_Error( 'authentication_failed', __( '<strong>ERROR</strong>' ) );
     }
 }
 
