@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/authy/authy-wordpress
  * Description: Add <a href="http://www.authy.com/">Authy</a> two-factor authentication to WordPress.
  * Author: Authy Inc
- * Version: 2.5
+ * Version: 2.5.1
  * Author URI: https://www.authy.com
  * License: GPL2+
  * Text Domain: authy
@@ -135,7 +135,7 @@ class Authy {
             add_filter( 'authenticate', array( $this, 'authenticate_user' ), 10, 3 );
 
             // Disable XML-RPC
-            if ( $this->get_setting( 'disable_xmlrpc' ) ) {
+            if ( $this->get_setting( 'disable_xmlrpc' ) == "true") {
                 add_filter( 'xmlrpc_enabled', '__return_false' );
             }
 
