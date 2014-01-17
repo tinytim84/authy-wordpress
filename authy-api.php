@@ -71,7 +71,7 @@ class Authy_API {
     $endpoint = sprintf( '%s/protected/json/users/new', $this->api_endpoint );
     $endpoint = add_query_arg( array(
       'api_key' => $this->api_key,
-      'user[email]' => $email,
+      'user[email]' => rawurlencode($email),
       'user[cellphone]' => $phone,
       'user[country_code]' => $country_code
     ), $endpoint );
