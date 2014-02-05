@@ -1,0 +1,72 @@
+.authy_logo {
+	background-color: #3b3b41;
+	width: 100%;
+	margin-bottom: 10px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	border-radius: 8px;
+}
+
+.authy_logo img {
+    display: block;
+    margin: 0 auto;
+    border:0;
+}
+
+.authy_dsw_container {
+	background: #f9f9f9;
+	font-family:'Open Sans', sans-serif; 
+	padding: 10px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	border-radius: 8px;
+}
+
+.nostats{
+	text-align: center;
+	font-size: 16px;
+	font-weight: 400;
+	font-family:'Open Sans', sans-serif; 
+}
+
+.authy_month {
+	margin: 10px 0;
+}
+
+.authy_stat {
+	display: inline-block;
+	margin-right: 10px;
+	width:	75px;
+	vertical-align: top;
+	margin-bottom: 10px;
+}
+
+.authy_stat:last-child {
+	margin-right: 0;
+}
+
+.authy_statValue {
+	font-size:34px; 
+	-webkit-border-radius: 25em;
+	-moz-border-radius: 25em;
+	border-radius: 25em;
+	border: 5px solid rgb(103, 194, 239); 
+	-webkit-box-sizing: content-box;
+	-moz-box-sizing: content-box;
+	box-sizing:content-box; 
+	width: 65px;
+	height: 65px;
+	line-height:65px;
+	text-align: center;
+}
+
+.authy_statText {
+	font-family:'Open Sans', sans-serif;
+	font-weight:400;
+	width: 100%;
+	text-align: center;
+}
+
+.authy_dashboard_link {
+	text-align: right;
+}

@@ -145,6 +145,12 @@ class Authy {
             // Enable the user with no privileges to run action_request_sms() in AJAX
             add_action( 'wp_ajax_nopriv_request_sms_ajax', array( $this, 'request_sms_ajax' ) );
             add_action( 'wp_ajax_request_sms_ajax', array( $this, 'request_sms_ajax' ) );
+
+            //Check to see if user has enabled the Authy Dashboard Widget
+            if ( $this->get_setting( 'enable_dashboard_stats' ) == "true") {
+                //Register Dashboard Widget
+                add_action('wp_dashboard_setup', array( $this, 'authy_add_dashboard_widgets' ) );
+            }   
         }
     }
 
@@ -168,6 +174,18 @@ class Authy {
                 'type'      => 'checkbox',
                 'sanitizer' => null,
             ),
+            array(
+                'name'      => 'enable_dashboard_stats',
+                'label'     => __( "Enable the Authy Dashboard Stats widget", 'authy_stats_dashboard_widget' ),
+                'type'      => 'checkbox',
+                'sanitizer' => null,
+            ),
+            array(
+                'name'      => 'number_of_months_to_show',
+                'label'     => __( "Number of months to show on the dashboard", 'authy_stats_months' ),
+                'type'      => 'numeric',
+                'sanitizer' => null,
+            )
         );
     }
 
@@ -257,7 +275,10 @@ class Authy {
         } elseif ( $current_screen->base === 'user-edit' ) {
             wp_enqueue_script( 'form-authy-js', 'https://www.authy.com/form.authy.min.js', array(), false, true );
             wp_enqueue_style( 'form-authy-css', 'https://www.authy.com/form.authy.min.css', array(), false, 'screen' );
-        }
+        } elseif ( $current_screen->base === 'settings_page_authy' ) {
+            //If on the Authy Settings page, load the requried JavaScript file
+            wp_enqueue_script( 'authy-settings', plugins_url( 'assets/authy-settings.js', __FILE__ ), array( 'jquery' ), 1.01, true );
+        } 
     }
 
     /**
@@ -364,6 +385,9 @@ class Authy {
         add_settings_field( 'api_key_production', __( 'Authy Production API Key', 'authy' ), array( $this, 'add_settings_api_key' ), $this->settings_page, 'default' );
         add_settings_field( 'authy_roles', __( 'Allow Authy for the following roles', 'authy' ), array( $this, 'add_settings_for_roles' ), $this->settings_page, 'default' );
         add_settings_field( 'disable_xmlrpc', __( "Disable external apps that don't support Two-factor Authentication", 'authy' ), array( $this, 'add_settings_disable_xmlrpc' ), $this->settings_page, 'default' );
+        //Add setting fields for dashboard widget
+        add_settings_field( 'enable_dashboard_stats', __( "Enabled Dashboard Stats Widget", 'authy' ), array( $this, 'add_settings_dashboard_stats' ), $this->settings_page, 'default' );
+        add_settings_field( 'number_of_months_to_show', __( "Number of months to show on the dashboard", 'authy' ), array( $this, 'add_stats_months' ), $this->settings_page, 'default' );
     }
 
     /**
@@ -428,6 +452,44 @@ class Authy {
             <p class ='description'><?php _e( "WordPress mobile app's don't support Two-Factor authentication. If you disable this option you will be able to use the apps but it will bypass Two-Factor Authentication.", 'authy' ); ?></p>
         <?php
     }
+
+    /**
+    * Render settings enabled dashboard stats widget
+    */
+    public function add_settings_dashboard_stats() {
+        if ( $this->get_setting( 'enable_dashboard_stats' ) == "false" ) {
+            $value = false;
+        } else {
+            $value = true;
+        }
+            //ID is required for the input as the JavaScript file is searching by ID for this element
+        ?>
+            <label for='<?php echo esc_attr( $this->settings_key ); ?>[enable_dashboard_stats]'>
+                <input name="<?php echo esc_attr( $this->settings_key ); ?>[enable_dashboard_stats]" id="<?php echo esc_attr( $this->settings_key ); ?>_enable_dashboard_stats" type="checkbox" value="true" <?php if ($value) echo 'checked="checked"'; ?> >
+                <span style='color: #bc0b0b;'><?php _e( 'Enable the Authy Dashboard Stats widget.' , 'authy' ); ?></span>
+            </label>
+            <p class ='description'><?php _e( "Shows Authy Stats on the dashboard.", 'authy' ); ?></p>
+        <?php
+    }
+
+    /**
+    * Render settings number of months to show on the dashboard stats
+    */
+    public function add_stats_months() {
+        $value = $this->get_setting( 'number_of_months_to_show' );
+        if ( $value <= 0 ) {
+            $value = 3;
+        }
+            //ID is required for the input as the JavaScript file is searching by ID for this element
+        ?>
+            <label for='<?php echo esc_attr( $this->settings_key ); ?>[number_of_months_to_show]'>
+                <input name="<?php echo esc_attr( $this->settings_key ); ?>[number_of_months_to_show]" id="<?php echo esc_attr( $this->settings_key ); ?>_number_of_months_to_show" type="number" value="<?php echo $value; ?>" >
+            </label>
+            <p class ='description'><?php _e( "The number of months to show stats for on the dashboard", 'authy' ); ?></p>
+        <?php
+    }
+
+    
 
     /**
      * Render settings page
@@ -1297,6 +1359,28 @@ class Authy {
 
             return $this->verify_authy_installation( $params );
         }
+    }
+
+    /**
+     *  Register the dashboard widget within WordPress
+     */
+    public function authy_add_dashboard_widgets() {
+        add_action( 'admin_head', 'authy_dashboard_stats_css' );
+        wp_add_dashboard_widget('authy_dashboard_widget', 'Authy Stats', 'authy_show_stats_dashboard');
+    }
+
+    /**
+     *  Return the number of months setting
+     */
+    public function numberOfMonths() {
+        return $this->get_setting( 'number_of_months_to_show' );
+    }
+
+    /**
+     *  Call the "GetStats" API request
+     */
+    public function getStats( $force = false ) {
+        return $this->api->requestStats( $force );
     }
 }
 

@@ -221,4 +221,28 @@ class Authy_API {
 
     return true;
   }
+
+  /**
+  * Request Authy Statistics
+  * @return mixed
+  */
+  public function requestStats() {
+    $endpoint = sprintf( '%s/protected/json/app/stats', $this->api_endpoint );
+    $arguments = array('api_key' => rawurlencode($this->api_key));
+
+    if ($force == true) {
+      $arguments['force'] = 'true';
+    }
+
+    $endpoint = add_query_arg( $arguments, $endpoint);
+    $response = wp_remote_get($endpoint);
+    $status_code = wp_remote_retrieve_response_code($response);
+    $body = wp_remote_retrieve_body($response);
+    $body = json_decode($body);
+
+    if ( $status_code == 200 ) {
+      return $body;
+    }
+    return __( 'Error fetching statistics', 'authy' );
+  }
 }

@@ -390,4 +390,96 @@ function normalize_cellphone( $cellphone ) {
   return $cellphone;
 }
 
+/**
+ * Add the required css file to style the dashboard stats
+ */
+function authy_dashboard_stats_css() {
+  echo "<link href='" . plugins_url( 'assets/authy_dashboard_stats_widget.css', __FILE__ ) . "' media='screen' rel='stylesheet' type='text/css'>";
+}
+
+/**
+ * Create and display the stats widget
+ */
+function authy_show_stats_dashboard() {
+  $mapping = array(
+    'sms_count'   =>  'SMS Sent',
+    'calls_count' =>  'Calls',
+    'users_count' =>  'New Users',
+    'auths_count' =>  'Auths',
+    'api_calls_count' =>  'API Calls' 
+  );
+
+  //Get Authy instance
+  $objAuthy = Authy::instance();
+  $numberOfMonths = max($objAuthy->numberOfMonths(), 3);
+  $objStats = $objAuthy->getStats();
+
+  $errorMsg = "No statistics are available";
+  if (gettype($objStats) === "string"){
+    $stats = array();
+    if (!empty($objStats)) $errorMsg = $objStats;
+  } else {
+    //Reverse Stats to show current first
+    $stats = array_reverse($objStats->stats);
+    $stats = array_slice($stats, 0, $numberOfMonths);
+  }
+  //Add sad face
+  $errorMsg .= " :(";
+
+  ?>
+  <div class="authy_logo">
+    <a href="http://www.authy.com/" title="Authy.com" target="_blank">
+      <img src="http://dashboard.authy.com/assets/logos/white_logo.png" alt="Authy Logo" width="144" height="33" align="center">
+    </a>
+  </div>
+  <div class="authy_dsw_container">
+  <?php
+  //If we have stats, show them, else, show no stats message
+  if (count($stats) > 0) {
+    $currentMonth = strtoupper(date('F'));
+    foreach ($stats as $stat){
+      if ($currentMonth == strtoupper($stat->month)){
+        // Making the api call for the stats counts as an extra API call :)
+        if (array_key_exists('api_calls_count', $stat)) $stat->api_calls_count += 1;
+
+        echo "<h3>Current - (" . $stat->month . " " . $stat->year . ")</h3>\n";
+      } else {
+        echo "<h3>" . $stat->month . " " . $stat->year . "</h3>\n";
+      }
+      echo "<div class='authy_month'>\n";
+
+      foreach ($mapping as $key => $value){
+        echo authy_build_stat($stat, $key, $value);
+      }
+      echo "</div>\n";
+    }
+  } else {
+    echo "<p class='nostats'>$errorMsg</p>\n";
+  }
+  ?>
+  </div>
+  <p class="authy_dashboard_link"><a href="https://dashboard.authy.com/" title="Go to Authy Dashboard" target="_blank">Go to Authy Dashboard</a></p>
+
+  <?php
+}
+
+/**
+ * Build a statistic and return
+ * @return string
+ */
+function authy_build_stat($stat, $statName, $displayText){
+  $out = "";
+  if (array_key_exists($statName, $stat) && !empty($displayText)){
+    $out  = "<div class='authy_stat'>\n";
+    $out .= " <div class='authy_statValue'>\n";
+    $out .= $stat->{$statName} . "\n";
+    $out .= " </div>\n";
+    $out .= " <div class='authy_statText'>\n";
+    $out .= "   <span class=''>$displayText</span>\n";
+    $out .= " </div>\n";
+    $out .= "</div>\n";    
+  }
+  return $out;
+}
+
 // closing the last tag is not recommended: http://php.net/basic-syntax.instruction-separation
