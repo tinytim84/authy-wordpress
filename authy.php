@@ -483,13 +483,13 @@ class Authy {
             //ID is required for the input as the JavaScript file is searching by ID for this element
         ?>
             <label for='<?php echo esc_attr( $this->settings_key ); ?>[number_of_months_to_show]'>
-                <input name="<?php echo esc_attr( $this->settings_key ); ?>[number_of_months_to_show]" id="<?php echo esc_attr( $this->settings_key ); ?>_number_of_months_to_show" type="number" value="<?php echo $value; ?>" >
+                <input name="<?php echo esc_attr( $this->settings_key ); ?>[number_of_months_to_show]" id="<?php echo esc_attr( $this->settings_key ); ?>_number_of_months_to_show" type="number" value="<?php echo $value; ?>" min="3" >
             </label>
             <p class ='description'><?php _e( "The number of months to show stats for on the dashboard", 'authy' ); ?></p>
         <?php
     }
 
-    
+
 
     /**
      * Render settings page
