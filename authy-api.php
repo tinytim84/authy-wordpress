@@ -230,10 +230,6 @@ class Authy_API {
     $endpoint = sprintf( '%s/protected/json/app/stats', $this->api_endpoint );
     $arguments = array('api_key' => rawurlencode($this->api_key));
 
-    if ($force == true) {
-      $arguments['force'] = 'true';
-    }
-
     $endpoint = add_query_arg( $arguments, $endpoint);
     $response = wp_remote_get($endpoint);
     $status_code = wp_remote_retrieve_response_code($response);
