@@ -577,6 +577,8 @@ class Authy {
                 if ( $value != "true" ) {
                     $value = "false";
                 }
+            } elseif ( $field['type'] === "numeric" ) {
+                $value = preg_replace( '#[^\d]#', '', $settings[ $field['name'] ] );
             } else {
                 $value = sanitize_text_field( $settings[ $field['name'] ] );
             }
