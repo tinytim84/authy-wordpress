@@ -466,7 +466,7 @@ class Authy {
         ?>
             <label for='<?php echo esc_attr( $this->settings_key ); ?>[enable_dashboard_stats]'>
                 <input name="<?php echo esc_attr( $this->settings_key ); ?>[enable_dashboard_stats]" id="<?php echo esc_attr( $this->settings_key ); ?>_enable_dashboard_stats" type="checkbox" value="true" <?php if ($value) echo 'checked="checked"'; ?> >
-                <span style='color: #bc0b0b;'><?php _e( 'Enable the Authy Dashboard Stats widget.' , 'authy' ); ?></span>
+                <span><?php _e( 'Enable the Authy Dashboard Stats widget.' , 'authy' ); ?></span>
             </label>
             <p class ='description'><?php _e( "Shows Authy Stats on the dashboard.", 'authy' ); ?></p>
         <?php
