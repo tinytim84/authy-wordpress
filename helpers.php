@@ -390,4 +390,23 @@ function normalize_cellphone( $cellphone ) {
   return $cellphone;
 }
 
+/**
+ * Encrypt the content
+ *
+ * The function is based on wp_generate_auth_cookie()
+ * GitHub Reference: https://github.com/WordPress/WordPress/blob/d7db798635fd3f38deb1a1f1fcc72f80ed252e9e/wp-includes/pluggable.php#L574
+ *
+ * @param string $content
+ * @param object $user
+ * @param string $scheme
+ * @return string
+ *
+ * @since 2.5.3
+ */
+ function encrypt_content( $content, $user, $expiration, $scheme = 'secure_auth' ) {
+  $pass_frag = substr($user->user_pass, 8, 4);
+  $key = wp_hash($content . $pass_frag . '|' . $expiration, $scheme);
+  return hash_hmac('md5', $content . '|' . $expiration, $key);
+ }
+
 // closing the last tag is not recommended: http://php.net/basic-syntax.instruction-separation

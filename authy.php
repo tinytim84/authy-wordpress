@@ -145,6 +145,17 @@ class Authy {
             // Enable the user with no privileges to run action_request_sms() in AJAX
             add_action( 'wp_ajax_nopriv_request_sms_ajax', array( $this, 'request_sms_ajax' ) );
             add_action( 'wp_ajax_request_sms_ajax', array( $this, 'request_sms_ajax' ) );
+
+            /**
+             * We need intercept every admin page, because when the authentication
+             * is made by other site in the network (WordPress Multisite), we can't
+             * hook any actions/filters related to authentication and we need
+             * verify if the user is logged using the Authy plugin
+             */
+            add_action('admin_bar_init', array( $this, 'verify_authy_login' ));
+
+            // Remove the login_with_2FA cookie
+            add_action('wp_logout', array( $this, 'remove_2FA_cookie' ));
         }
     }
 
@@ -312,6 +323,7 @@ class Authy {
 
         return $value;
     }
+
 
     /**
      * Build Ajax URL for users' connection management
@@ -1065,6 +1077,39 @@ class Authy {
         authy_installation_form( $user, $user_data, $user_signature['authy_signature'], $errors );
     }
 
+    /**
+     * Verify the authentication with 2FA
+     *
+     * Check the login_with_2FA cookie
+     *
+     * @since 2.5.3
+     */
+    public function verify_authy_login() {
+        $user = wp_get_current_user();
+
+        if ( $this->user_has_authy_id( $user->ID ) ) {
+            $cookie_elements = explode('|', $_COOKIE['login_with_2FA']);
+            list($content, $expiration) = $cookie_elements;
+
+            $hash = encrypt_content( 'true', $user, $expiration, 'secure_auth' );
+
+            if ( $hash != $content ) {
+                setcookie( 'login_with_2FA', '', time() - 3600, COOKIEPATH, COOKIE_DOMAIN );
+                wp_logout();
+                $redirect_to = get_site_url() . "/wp-login.php?loggedout=true";
+                wp_safe_redirect( $redirect_to );
+            }
+        }
+    }
+
+    /**
+     * Remove the login_with_2FA cookie
+     *
+     * @since 2.5.3
+     */
+    public function remove_2FA_cookie() {
+        setcookie( 'login_with_2FA', '', time() - 3600, COOKIEPATH, COOKIE_DOMAIN );
+    }
 
     /**
      * Do password authentication and redirect to 2nd screen
@@ -1114,7 +1159,7 @@ class Authy {
      * @param mixed $user
      * @return mixed
      */
-    public function login_with_2FA( $user, $signature, $authy_token, $redirect_to, $remember_me ) {
+    public function login_with_2FA( $user, $signature, $authy_token, $remember_me ) {
         // Do 2FA if signature is valid.
         if ( $this->api->verify_signature( get_user_meta( $user->ID, $this->signature_key, true ), $signature ) ) {
             // invalidate signature
@@ -1127,11 +1172,20 @@ class Authy {
 
             // Act on API response
             if ( $api_response === true ) {
-                // If remember me is set the cookies will be kept for 14 days.
-                $remember_me = ($remember_me == 'forever') ? true : false;
-                wp_set_auth_cookie( $user->ID, $remember_me ); // token was checked so go ahead.
-                wp_safe_redirect( $redirect_to );
-                exit(); // redirect without returning anything.
+                // Calcule the expiration date
+                $expire = 0;
+                if ( $remember_me == 'forever' ) {
+                    $expire = time() + ( 14 * DAY_IN_SECONDS ) + ( 12 * HOUR_IN_SECONDS );
+                }
+
+                // Encrypt data to save on cookie
+                $hash = encrypt_content( 'true', $user, $expire, 'secure_auth' );
+                $content = $hash . '|' . $expire;
+
+                // save in cookie if user logged with 2FA
+                setcookie('login_with_2FA', $content, $expire, COOKIEPATH, COOKIE_DOMAIN, false, true);
+
+                return $user; // Continue authentication with WordPress
             } elseif ( is_string( $api_response ) ) {
                 return new WP_Error( 'authentication_failed', __( '<strong>ERROR</strong>: ' . $api_response, 'authy' )  );
             }
@@ -1271,8 +1325,7 @@ class Authy {
             // This line prevents WordPress from setting the authentication cookie and display errors.
             remove_action( 'authenticate', 'wp_authenticate_username_password', 20 );
 
-            $redirect_to = isset( $_POST['redirect_to'] ) ? $_POST['redirect_to'] : null;
-            return $this->login_with_2FA( $user, $signature, $authy_token, $redirect_to, $remember_me );
+            return $this->login_with_2FA( $user, $signature, $authy_token, $remember_me );
         }
         elseif ( $step == 'enable_authy' && $authy_user_info && isset( $authy_user_info['country_code'] ) && isset( $authy_user_info['cellphone'] ) )
         {
