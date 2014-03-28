@@ -27,7 +27,7 @@ function authy_header( $step = '' ) { ?>
         var AuthyAjax = {"ajaxurl":"<?php echo admin_url( 'admin-ajax.php' ); ?>"};
         /* ]]> */
         </script>
-        <script src="<?php echo admin_url( 'load-scripts.php?c=1&load=jquery,utils' ); ?>" type="text/javascript"></script>
+        <?php wp_print_scripts( array( 'jquery', 'utils') ); ?>
         <script src="<?php echo plugins_url( 'assets/authy-installation.js', __FILE__ ); ?>" type="text/javascript"></script>
     <?php } ?>
   </head>
