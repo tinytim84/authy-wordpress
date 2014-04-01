@@ -113,6 +113,9 @@ class Authy {
         $this->register_settings_fields();
         $this->prepare_api();
 
+        // Loads the plugin's translated strings.
+        load_plugin_textdomain('authy', false, dirname( plugin_basename( __FILE__ ) ).'/languages' );
+
         // Plugin settings
         add_action( 'admin_init', array( $this, 'action_admin_init' ) );
         add_action( 'admin_menu', array( $this, 'action_admin_menu' ) );
@@ -465,7 +468,7 @@ class Authy {
               </form>
 
               <?php if ( !empty( $details ) ) { ?>
-                <h2>Application Details</h2>
+                <h2><?php _e( 'Application Details', 'authy' ); ?></h2>
 
                 <table class='widefat' style="width:400px;">
                     <tbody>
