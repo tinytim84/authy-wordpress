@@ -167,7 +167,7 @@ class Authy {
             ),
             array(
                 'name'      => 'disable_xmlrpc',
-                'label'     => __( "Disable external apps that don't support Two-factor Authentication", 'authy_wp' ),
+                'label'     => __( "Disable external apps that don't support Two-factor Authentication", 'authy' ),
                 'type'      => 'checkbox',
                 'sanitizer' => null,
             ),
@@ -1263,7 +1263,7 @@ class Authy {
         }
 
         if( !empty($_POST) && !isset( $signature ) ) {
-            return new WP_Error( 'authentication_failed', __( '<strong>ERROR: missing credentials</strong>' ) );
+            return new WP_Error( 'authentication_failed', __( '<strong>ERROR: missing credentials</strong>', 'authy' ) );
         }
 
         $authy_token = isset( $_POST['authy_token'] ) ? $_POST['authy_token'] : null;
