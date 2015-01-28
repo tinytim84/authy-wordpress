@@ -8,7 +8,9 @@
  * @since 1.0.0
  */
 
-class Authy_API {
+require_once(AUTHY_PATH . 'lib/class.authy-exceptions.php');
+
+class AuthyAPI {
   /**
    * Class variables
    */
@@ -27,18 +29,12 @@ class Authy_API {
    * @return object
    */
   public static function instance( $api_key, $api_endpoint ) {
-    if ( ! is_a( self::$__instance, 'Authy_API' ) ) {
-      if ( is_null( $api_key ) || is_null( $api_endpoint ) )
-        return null;
-
-      self::$__instance = new Authy_API;
-
+    if ( ! is_a( self::$__instance, 'AuthyAPI' ) || !self::$__instance->ready() ) {
+      self::$__instance = new AuthyAPI;
       self::$__instance->api_key = $api_key;
       self::$__instance->api_endpoint = $api_endpoint;
-
       self::$__instance->setup();
     }
-
     return self::$__instance;
   }
 
@@ -64,6 +60,7 @@ class Authy_API {
     $args['user-agent'] = 'AuthyWordPress/'. AUTHY_VERSION. ' ('. PHP_OS. '; WordPress ' . $GLOBALS['wp_version'] . ')';
 
     $api_response = wp_remote_request($url, $args);
+    error_log("[Authy] API response: " . print_r( $api_response, true ));
     $status_code = wp_remote_retrieve_response_code($api_response);
 
     $body = wp_remote_retrieve_body($api_response);
@@ -72,9 +69,15 @@ class Authy_API {
     $response = new stdClass;
     $response->status_code = $status_code;
     $response->body = $body;
-    $response->success = $body->success;
+    $response->success = isset($body->success) ? $body->success : null;
 
     return $response;
+  }
+
+  public function ready() {
+    $is_empty_api_key = is_null( $this->api_key ) || empty( $this->api_key );
+    $is_empty_api_endpoint = is_null( $this->api_endpoint ) || empty( $this->api_endpoint );
+    return !$is_empty_api_key && !$is_empty_api_endpoint;
   }
 
   /**
@@ -153,7 +156,6 @@ class Authy_API {
   * @param string $id
   * @return mixed
   */
-
   public function request_sms($id, $force) {
     // Sanitize the arguments
     $id = preg_replace( '#[^\d]#', '', $id );
@@ -180,6 +182,10 @@ class Authy_API {
   * @return array
   */
   public function application_details() {
+    if( !$this->ready() ) {
+      return false;
+    }
+
     $endpoint = sprintf( '%s/protected/json/app/details', $this->api_endpoint );
     $endpoint = add_query_arg( array('api_key' => rawurlencode($this->api_key)), $endpoint);
 
@@ -214,6 +220,43 @@ class Authy_API {
   */
   public function generate_signature() {
     return wp_generate_password(64, false, false);
+  }
+
+  /**
+  * Sends onetouch approval request
+  * 
+  * @param string $id Authy user id
+  * @param array $args Parameters sent to the approval request. Required 'message'. 
+  * Check http://docs.authy.com/onetouch.html for additional info.
+  * @return array
+  */
+  public function send_approval_request($id, $args = array()){
+    // Sanitize the arguments
+    $id = preg_replace( '#[^\d]#', '', $id );
+
+    if( !isset($args['message']) ){
+      throw new AuthyMissingFieldException("'message' is required to send a onetouch approval request", 1);      
+    }
+
+    $endpoint = sprintf( '%s/onetouch/json/users/%d/approval_requests?', $this->api_endpoint, $id );
+    $endpoint .= http_build_query( array_merge( array('api_key' => $this->api_key), $args ) );
+
+    $response = $this->request($endpoint, array('method' => 'POST'));
+    if ( !empty($response->body) ) {
+      return $response->body;
+    }
+
+    return false;
+  }
+
+  public function approval_request_status($uuid){
+    $endpoint = sprintf( '%s/onetouch/json/approval_requests/%s', $this->api_endpoint, $uuid );
+    $endpoint = add_query_arg( array('api_key' => rawurlencode($this->api_key)), $endpoint);
+    $response = $this->request($endpoint, array('method' => 'GET'));
+    if ( !empty($response->body) ) {
+      return $response->body;
+    }
+    return false;
   }
 
   /**
