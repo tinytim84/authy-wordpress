@@ -1125,7 +1125,6 @@ class Authy {
 
             // Check the specified token
             $authy_id = $this->get_user_authy_id( $user->ID );
-            $authy_token = preg_replace( '#[^\d]#', '', $authy_token );
             $api_response = $this->api->check_token( $authy_id, $authy_token );
 
             // Act on API response
@@ -1207,8 +1206,7 @@ class Authy {
         $authy_id = $data_temp['authy_id'];
 
         // Check the specified token
-        $authy_token = preg_replace( '#[^\d]#', '', $params['authy_token'] );
-        $check_token_response = $this->api->check_token( $authy_id, $authy_token );
+        $check_token_response = $this->api->check_token( $authy_id, $params['authy_token'] );
 
         if ( $check_token_response === true ) {
             // Save authy data of user on database

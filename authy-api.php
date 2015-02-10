@@ -100,6 +100,15 @@ class Authy_API {
    * @return mixed
    */
   public function check_token( $id, $token ) {
+    // Sanitize arguments
+    $id = preg_replace( '#[^\d]#', '', $id );
+    $token = preg_replace( '#[^\d]#', '', $token );
+
+    // Validate the token length
+    if ( strlen( $token ) < 6 && strlen( $token ) > 10 ) {
+      return __( 'Invalid Authy Token.', 'authy' );
+    }
+
     // Build API endpoint
     // Token must be a string because it can have leading zeros
     $endpoint = sprintf( '%s/protected/json/verify/%s/%d', $this->api_endpoint, $token, $id );
@@ -133,6 +142,9 @@ class Authy_API {
   */
 
   public function request_sms($id, $force) {
+    // Sanitize the arguments
+    $id = preg_replace( '#[^\d]#', '', $id );
+
     $endpoint = sprintf( '%s/protected/json/sms/%d', $this->api_endpoint, $id );
     $arguments = array('api_key' => rawurlencode($this->api_key));
 
