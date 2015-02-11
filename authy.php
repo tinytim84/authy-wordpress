@@ -24,6 +24,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+define( 'AUTHY_VERSION', '2.5.4' );
+
 require_once 'helpers.php';
 
 class Authy {
