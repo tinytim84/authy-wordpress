@@ -7,13 +7,17 @@ Stable tag: 3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Authy is the easiest and fastest way to add strong 2 Factor Authentication to your WordPress blog to keep it safe of hacking attacks easy & quickly.
+Authy is the easiest and fastest way to add strong 2 Factor Authentication to your WordPress blog.
 
 == Description ==
 
 Authy helps you increase security for your user accounts in your WordPress site by using strong Two-Factor authentication. The plugin can be installed and configured in a matter of minutes.
 
 Two-Factor Authentication protects you from password re-use, phishing and keylogger attacks. The Authy WordPress plugin was designed so that anyone can install it, configure it and use it. Security shouldn't be painful!
+
+**NOTICE**
+
+If you are running an older version of the WordPress plugin (i.e. 2.5.5 and below) and you are running a version of Wordpress 4.5 and above, please upgrade your Authy plugin to 3.0 and above to remediate a problem where 2FA can be bypassed in certain circumstances.
 
 = How it Works =
 
