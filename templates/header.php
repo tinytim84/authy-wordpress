@@ -27,6 +27,6 @@
       <script src="<?php echo plugins_url( 'assets/authy-installation.js', dirname(__FILE__) ); ?>" type="text/javascript"></script>
   <?php elseif( isset($onetouch_request) && !empty($onetouch_request) ): ?>
       <?php wp_print_scripts( array( 'jquery' ) ); ?>
-      <script src="<?php echo plugins_url( 'assets/authy-onetouch.js', dirname(__FILE__) ); ?>" type="text/javascript"></script>
+      <script src="<?php echo plugins_url( 'assets/authy-onetouch.js', dirname(__FILE__) ); ?>" type="text/javascript" defer="defer"></script>
   <?php endif; ?>
 </head>
